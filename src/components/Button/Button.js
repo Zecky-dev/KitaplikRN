@@ -9,14 +9,14 @@ const Button = ({label,icon,onPress,oval = false,additionalStyles}) => {
             onPress={onPress}
             style={[
                 styles.container,
-                additionalStyles.container,
+                additionalStyles?.container,
                 oval && {borderRadius: 24}
             ]}
         >
             {icon && (
                 <Icon name={icon.name} size={icon.size} color={icon.color} style={styles.icon}/>
             )}
-            <Text style={[styles.label,additionalStyles.label]}>
+            <Text style={[styles.label,additionalStyles?.label]}>
                 {label}
             </Text>
         </TouchableOpacity>

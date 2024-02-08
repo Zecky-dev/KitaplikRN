@@ -17,43 +17,10 @@ import Button from '../../../components/Button/Button';
 import styles from './Register.style';
 import colors from '../../../utils/colors';
 
-import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
-import PickImageModal from '../../../components/PickImageModal/PickImageModal';
+import PickImage from '../../../components/PickImage/PickImage';
 
-const Register = () => {
-  const [modalVisible, setModalVisible] = useState(false);
+const Register = ({navigation}) => {
   const [image, setImage] = useState(null);
-
-  async function takePhotoFromCamera() {
-    try {
-      const result = await launchCamera({
-        mediaType: 'photo',
-        cameraType: 'front',
-        quality: 1,
-      });
-      setImage(result.assets[0].uri);
-    } catch (err) {
-      console.log("Error: ", err.message)
-    }
-    finally {
-      setModalVisible(false)
-    }
-  }
-
-  async function pickImageFromGallery() {
-    try {
-      const result = await launchImageLibrary({
-        mediaType: "photo",
-        quality: 1,
-      });
-      setImage(result.assets[0].uri);
-    } catch (err) {
-      console.log("Error: ",err.message)
-    }
-    finally {
-      setModalVisible(false)
-    }
-  }
 
   return (
     <ImageBackground
@@ -62,15 +29,7 @@ const Register = () => {
       blurRadius={12}
       resizeMode="cover">
       <SafeAreaView>
-
-        <PickImageModal
-        modalVisible={modalVisible}
-        setModalVisible={setModalVisible}
-        takePhotoFromCamera={takePhotoFromCamera}
-        pickImageFromGallery={pickImageFromGallery}
-        />
-
-        <Pressable onPress={() => router.back()}>
+        <Pressable onPress={() => navigation.goBack()}>
           <Icon name="chevron-left" color={colors.white} size={48} />
         </Pressable>
 
@@ -80,9 +39,7 @@ const Register = () => {
             <Text style={styles.heading}>Kayıt Ol</Text>
           </View>
 
-          <Pressable
-            onPress={() => setModalVisible(!modalVisible)}
-            style={styles.pickImageButtonContainer}>
+          <PickImage image={image} setImage={setImage}>
             <Image
               source={
                 !image
@@ -96,7 +53,7 @@ const Register = () => {
                 Fotoğraf Seç (Opsiyonel)
               </Text>
             )}
-          </Pressable>
+          </PickImage>
 
           <Input oval={false} label={'Ad Soyad'} onChangeText={() => null} />
           <Input

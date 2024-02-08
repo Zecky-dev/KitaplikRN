@@ -4,28 +4,63 @@ import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 import styles from "./Input.style";
 
+const lightStyles = {
+  container: {
+    ...styles.container,
+    borderColor: "white",
+  },
+  label: {
+    ...styles.label,
+    color: "white",
+  },
+  input: {
+    ...styles.label,
+    color: "white",
+  }
+}
+
+const darkStyles = {
+  container: {
+    ...styles.container,
+    borderColor: "black",
+  },
+  label: {
+    ...styles.label,
+    color: "black",
+  },
+  input: {
+    ...styles.label,
+    color: "black",
+  }
+}
+
 const Input = ({
   placeholder,
   secureEntry = false,
   onChangeText,
   value,
+  multiline = false,
   oval = true,
   label,
+  dark = false,
   additionalStyles,
 }) => {
+  
+  const styles = dark ? darkStyles : lightStyles
+  
   const [hidden, setHidden] = useState(secureEntry);
 
   return (
     <>
       {label && (
-        <Text style={[styles.inputLabel, additionalStyles?.inputLabel]}>
+        <Text style={[styles.label, additionalStyles?.label]}>
           {label}
         </Text>
       )}
       <View
         style={[
-          styles.inputContainer,
-          additionalStyles?.inputContainer,
+          styles.container,
+          additionalStyles?.container,
           oval && {
             borderRadius: 24,
           },
@@ -34,9 +69,10 @@ const Input = ({
         <TextInput
           style={[styles.input, additionalStyles?.input]}
           placeholder={placeholder}
-          placeholderTextColor={"white"}
+          placeholderTextColor={"rgba(0,0,0,0.5)"}
           secureTextEntry={hidden}
           caretHidden={true}
+          multiline={multiline}
         />
 
         {secureEntry && (
