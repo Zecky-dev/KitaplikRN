@@ -29,8 +29,8 @@ const styles = StyleSheet.create({
     marginVertical: 8,
   },
   profileImage: {
-    width: 150,
-    height: 150,
+    width: 100,
+    height: 100,
     borderRadius: 75,
   },
   pickImageLabel: {
@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const PickImage = ({image,setImage,children}) => {
+const PickImage = ({image,setImage,children,handleImageChange}) => {
 
   const [modalVisible,setModalVisible] = useState(false)  
 
@@ -73,7 +73,7 @@ const PickImage = ({image,setImage,children}) => {
                   },
                 }}
                 label={'Kameradan Çek'}
-                onPress={() => takePhotoFromCamera(setImage,setModalVisible)}
+                onPress={() => takePhotoFromCamera(setImage,setModalVisible,handleImageChange)}
               />
               <Button
                 icon={{
@@ -87,7 +87,7 @@ const PickImage = ({image,setImage,children}) => {
                   },
                 }}
                 label={'Galeriden Seç'}
-                onPress={() => pickImageFromGallery(setImage,setModalVisible)}
+                onPress={() => pickImageFromGallery(setImage,setModalVisible,handleImageChange)}
               />
             </View>
           </View>

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {StatusBar, TouchableOpacity} from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
@@ -19,6 +19,12 @@ import colors from './utils/colors';
 // Navigators
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
+
+// auth
+import auth from '@react-native-firebase/auth'
+
+// Flash Message
+import FlashMessage from "react-native-flash-message";
 
 const AuthStack = () => {
   return (
@@ -63,19 +69,34 @@ const MainTabs = () => {
         }}
       />
     </Tab.Navigator>
-  );
+  ); 
 };
 
 const App = () => {
-  const [loggedIn, setLoggedIn] = useState(true);
+
+  const [initializing, setInitializing] = useState(true);
+  const [user, setUser] = useState();
+
+  function onAuthStateChanged(user) {
+    setUser(user);
+    if (initializing) setInitializing(false);
+  }
+
+  useEffect(() => {
+    const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
+    return subscriber;
+  }, []);
+
+  if (initializing) return null;
 
   return (
       <>
       <NavigationContainer>
         <StatusBar backgroundColor="transparent" translucent={true} />
-        {loggedIn ? <MainTabs /> : <AuthStack />}
+        {user ? <MainTabs /> : <AuthStack />}
       </NavigationContainer>
       <ModalPortal/>
+      <FlashMessage position={"top"}/>
       </>
       
   );

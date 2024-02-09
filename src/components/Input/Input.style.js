@@ -4,7 +4,7 @@ export default StyleSheet.create({
     flexDirection: "row",
     borderWidth: 0.5,
     borderRadius: 4,
-    marginBottom: 12,
+    marginBottom: 8,
     paddingHorizontal: 8,
     alignItems: 'center',
   },

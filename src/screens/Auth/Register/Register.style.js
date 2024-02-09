@@ -12,9 +12,9 @@ export default StyleSheet.create({
     marginTop: 8,
   },
   profileImage: {
-    width: 150,
-    height: 150,
-    borderRadius: 75,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
   },
   heading: {
     color: "white",

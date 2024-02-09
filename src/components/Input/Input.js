@@ -14,7 +14,7 @@ const lightStyles = {
     color: "white",
   },
   input: {
-    ...styles.label,
+    ...styles.input,
     color: "white",
   }
 }
@@ -29,7 +29,7 @@ const darkStyles = {
     color: "black",
   },
   input: {
-    ...styles.label,
+    ...styles.input,
     color: "black",
   }
 }
@@ -69,9 +69,10 @@ const Input = ({
         <TextInput
           style={[styles.input, additionalStyles?.input]}
           placeholder={placeholder}
-          placeholderTextColor={"rgba(0,0,0,0.5)"}
+          placeholderTextColor={dark ? "rgba(0,0,0,0.5)" : "white"}
           secureTextEntry={hidden}
           caretHidden={true}
+          onChangeText={onChangeText}
           multiline={multiline}
         />
 
