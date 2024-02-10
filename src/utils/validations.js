@@ -36,11 +36,22 @@ const RegisterSchema = yup.object().shape({
 const LoginSchema = yup.object().shape({
     email: yup
     .string(ERRORS.string)
+    .required(ERRORS.required)
     .email(ERRORS.email),
     password: yup
     .string(ERRORS.string)
+    .required(ERRORS.required)
     .min(6, ({min}) => `Minimum ${min} karakter uzunluğunda giriş yapınız!`)
     .max(16, ({max}) => `Minimum ${max} karakter uzunluğunda giriş yapınız!`)
 })
 
-export {RegisterSchema,LoginSchema}
+const PostSchema = yup.object().shape({
+    image: yup.
+    string(ERRORS.string)
+    .required(ERRORS.required),
+    content: yup
+    .string(ERRORS.string)
+    .required(ERRORS.required)
+})
+
+export {RegisterSchema,LoginSchema,PostSchema}

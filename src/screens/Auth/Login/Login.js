@@ -18,7 +18,7 @@ import {Formik} from 'formik';
 import {LoginSchema} from '../../../utils/validations';
 
 // Flash Message
-import { showMessage,hideMessage } from 'react-native-flash-message';
+import { showMessage } from 'react-native-flash-message';
 import { getAuthErrorMessage } from '../../../utils/firebaseErrors';
 
 const errorStyles = {

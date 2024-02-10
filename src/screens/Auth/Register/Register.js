@@ -119,7 +119,7 @@ const Register = ({navigation}) => {
       blurRadius={12}
       resizeMode="cover">
       <SafeAreaView>
-        <LoadingModal visible={loading} progress={loadingProgress}/>
+        <LoadingModal visible={loading} progress={loadingProgress} label={"Kayıt olunuyor"}/>
         <Pressable onPress={() => navigation.goBack()}>
           <Icon name="chevron-left" color={colors.white} size={48} />
         </Pressable>
