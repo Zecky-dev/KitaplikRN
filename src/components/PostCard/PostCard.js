@@ -1,10 +1,15 @@
 import React, {useState, useEffect} from 'react';
-import {View, Text, Image, Button, Pressable} from 'react-native';
+import {View, Text, Image, Button, Pressable, TouchableOpacity} from 'react-native';
 
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import styles from './PostCard.style';
 import firestore from '@react-native-firebase/firestore'
+
+import auth from '@react-native-firebase/auth'
+
+const currentUser = auth().currentUser.email
+
 
 const PostCard = ({postDetail}) => {
   const {owner,comments,content,id,image,likes} = postDetail
@@ -28,7 +33,7 @@ const PostCard = ({postDetail}) => {
     return (
       <View style={styles.container}>
         <View style={{flex: 1}}>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+          <TouchableOpacity style={{flexDirection: 'row', alignItems: 'center'}} activeOpacity={.8}>
             <Image
               source={{
                 uri: postOwner?.image,
@@ -59,7 +64,7 @@ const PostCard = ({postDetail}) => {
                 />
               </View>
             </View>
-          </View>
+          </TouchableOpacity>
           <Text style={{textAlign: 'justify', marginVertical: 4}}>
             {content}
           </Text>
@@ -73,11 +78,22 @@ const PostCard = ({postDetail}) => {
             }}>
             <Pressable
               style={{flexDirection: 'row', alignItems: 'center'}}
-              onPress={() => setLiked(!liked)}>
+              onPress={() => {
+                if(likes.includes(currentUser)) {
+                  firestore().collection('Posts').doc(id).update({
+                    likes: firestore.FieldValue.arrayRemove(currentUser)
+                  })
+                }
+                else {
+                  firestore().collection('Posts').doc(id).update({
+                    likes: firestore.FieldValue.arrayUnion(currentUser)
+                  })
+                }
+              }}>
               <Icon
-                name={liked ? 'heart' : 'heart-outline'}
+                name={likes.includes(currentUser) ? "heart" : "heart-outline"}
                 size={24}
-                color={liked ? 'red' : null}
+                color={likes.includes(currentUser) ? "red" : null}
               />
               <Text style={{marginLeft: 4, fontSize: 14}}>Beğen</Text>
             </Pressable>
