@@ -1,39 +1,55 @@
 import React, {useState, useEffect} from 'react';
-import {View, Text, Image, Button, Pressable, TouchableOpacity} from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  Button,
+  Pressable,
+  TouchableOpacity,
+} from 'react-native';
 
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import styles from './PostCard.style';
-import firestore from '@react-native-firebase/firestore'
+import firestore from '@react-native-firebase/firestore';
 
-import auth from '@react-native-firebase/auth'
+import auth from '@react-native-firebase/auth';
 
-const currentUser = auth().currentUser.email
+const currentUser = auth().currentUser.email;
 
-
-const PostCard = ({postDetail}) => {
-  const {owner,comments,content,id,image,likes} = postDetail
+const PostCard = ({postDetail, navigateToProfile, preview = false}) => {
+  const {owner, comments, content, id, image, likes} = postDetail;
   const [commentModalVisible, setCommentModalVisible] = useState(false);
   const [likeModalVisible, setLikeModalVisible] = useState(false);
   const [liked, setLiked] = useState(false);
   const [postOwner, setPostOwner] = useState(null);
 
   async function getPostOwner() {
-    if(owner!==undefined && owner !== null) {
-      const ownerQueryResult = await firestore().collection('Users').where("emailAddress","==",owner).get()
-      setPostOwner(ownerQueryResult.docs[0].data())
-    }  
+    if (owner !== undefined && owner !== null) {
+      const ownerQueryResult = await firestore()
+        .collection('Users')
+        .where('emailAddress', '==', owner)
+        .get();
+      setPostOwner(ownerQueryResult.docs[0].data());
+    }
   }
 
   useEffect(() => {
-    getPostOwner()
+    getPostOwner();
   }, [postDetail]);
 
-  if(postOwner!==undefined && postOwner!==null && postDetail) {
+  if (postOwner !== undefined && postOwner !== null && postDetail) {
     return (
       <View style={styles.container}>
         <View style={{flex: 1}}>
-          <TouchableOpacity style={{flexDirection: 'row', alignItems: 'center'}} activeOpacity={.8}>
+          <TouchableOpacity
+            style={{flexDirection: 'row', alignItems: 'center'}}
+            activeOpacity={0.8}
+            onPress={() => {
+              if(!preview) {
+                navigateToProfile(postOwner.emailAddress)
+              }
+            }}>
             <Image
               source={{
                 uri: postOwner?.image,
@@ -58,52 +74,78 @@ const PostCard = ({postDetail}) => {
                   alignItems: 'center',
                 }}>
                 <Text>@{postOwner?.username}</Text>
-                <Button
-                  title="Takip Et"
-                  onPress={() => console.log('Takip Et')}
-                />
+                {!preview && (
+                  <Button
+                    title="Takip Et"
+                    onPress={() => console.log('Takip Et')}
+                  />
+                )}
               </View>
             </View>
           </TouchableOpacity>
           <Text style={{textAlign: 'justify', marginVertical: 4}}>
             {content}
           </Text>
-  
-          <View
-            style={{
-              flexDirection: 'row',
-              flex: 1,
-              justifyContent: 'space-around',
-              marginTop: 4,
-            }}>
-            <Pressable
-              style={{flexDirection: 'row', alignItems: 'center'}}
-              onPress={() => {
-                if(likes.includes(currentUser)) {
-                  firestore().collection('Posts').doc(id).update({
-                    likes: firestore.FieldValue.arrayRemove(currentUser)
-                  })
-                }
-                else {
-                  firestore().collection('Posts').doc(id).update({
-                    likes: firestore.FieldValue.arrayUnion(currentUser)
-                  })
-                }
+
+          {!preview && (
+            <View
+              style={{
+                flexDirection: 'row',
+                flex: 1,
+                justifyContent: 'space-around',
+                marginTop: 4,
               }}>
-              <Icon
-                name={likes.includes(currentUser) ? "heart" : "heart-outline"}
-                size={24}
-                color={likes.includes(currentUser) ? "red" : null}
-              />
-              <Text style={{marginLeft: 4, fontSize: 14}}>Beğen</Text>
-            </Pressable>
-            <Pressable style={{flexDirection: 'row', alignItems: 'center'}}>
-              <Icon name="comment-outline" size={24} />
-              <Text style={{marginLeft: 4, fontSize: 14}}>Yorum Yap</Text>
-            </Pressable>
-          </View>
+              <Pressable
+                style={{flexDirection: 'row', alignItems: 'center'}}
+                onPress={async () => {
+                  const usernameQuery = await firestore()
+                    .collection('Users')
+                    .where('emailAddress', '==', currentUser)
+                    .get();
+                  const username = usernameQuery.docs[0].data().username;
+                  if (likes.includes(currentUser)) {
+                    firestore()
+                      .collection('Posts')
+                      .doc(id)
+                      .update({
+                        likes: firestore.FieldValue.arrayRemove(currentUser),
+                      });
+                    await firestore()
+                      .collection('Users')
+                      .doc(username)
+                      .update({
+                        likes: firestore.FieldValue.arrayRemove(id),
+                      });
+                  } else {
+                    firestore()
+                      .collection('Posts')
+                      .doc(id)
+                      .update({
+                        likes: firestore.FieldValue.arrayUnion(currentUser),
+                      });
+                    await firestore()
+                      .collection('Users')
+                      .doc(username)
+                      .update({
+                        likes: firestore.FieldValue.arrayUnion(id),
+                      });
+                  }
+                }}>
+                <Icon
+                  name={likes.includes(currentUser) ? 'heart' : 'heart-outline'}
+                  size={24}
+                  color={likes.includes(currentUser) ? 'red' : null}
+                />
+                <Text style={{marginLeft: 4, fontSize: 14}}>Beğen</Text>
+              </Pressable>
+              <Pressable style={{flexDirection: 'row', alignItems: 'center'}}>
+                <Icon name="comment-outline" size={24} />
+                <Text style={{marginLeft: 4, fontSize: 14}}>Yorum Yap</Text>
+              </Pressable>
+            </View>
+          )}
         </View>
-  
+
         <Image
           source={{
             uri: image,
@@ -114,7 +156,6 @@ const PostCard = ({postDetail}) => {
       </View>
     );
   }
-
 };
 
 export default PostCard;

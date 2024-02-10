@@ -58,6 +58,12 @@ const Feed = ({navigation}) => {
       });
   }
 
+  function navigateToProfile(emailAddress) {
+    navigation.navigate('ProfileDetailScreen',{
+      emailAddress
+    })
+  }
+
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
@@ -104,6 +110,7 @@ const Feed = ({navigation}) => {
     setPostsLoading(true);
     const subscriber = firestore()
       .collection('Posts')
+      .orderBy('createDate')
       .onSnapshot(querySnapshot => {
         const postDocs = querySnapshot.docs;
         const tempPosts = [];
@@ -128,10 +135,15 @@ const Feed = ({navigation}) => {
         setVisible={setCreatePostModalVisible}
         createPost={createPost}
       />
-      <FlatList
-        data={posts}
-        renderItem={({item}) => <PostCard postDetail={item} />}
-      />
+
+      {postsLoading ? (
+        <Text>Gönderiler yükleniyor!!</Text>
+      ) : (
+        <FlatList
+          data={posts}
+          renderItem={({item}) => <PostCard postDetail={item} navigateToProfile={navigateToProfile} />}
+        />
+      )}
     </View>
   );
 };
