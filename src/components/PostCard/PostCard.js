@@ -46,8 +46,8 @@ const PostCard = ({postDetail, navigateToProfile, preview = false}) => {
             style={{flexDirection: 'row', alignItems: 'center'}}
             activeOpacity={0.8}
             onPress={() => {
-              if(!preview) {
-                navigateToProfile(postOwner.emailAddress)
+              if (!preview) {
+                navigateToProfile(postOwner.emailAddress);
               }
             }}>
             <Image
@@ -98,37 +98,41 @@ const PostCard = ({postDetail, navigateToProfile, preview = false}) => {
               <Pressable
                 style={{flexDirection: 'row', alignItems: 'center'}}
                 onPress={async () => {
-                  const usernameQuery = await firestore()
+                  // Şuanki kullanıcının like'larını al
+                  const emailAddress = auth().currentUser.email;
+                  const userQuery = await firestore()
                     .collection('Users')
-                    .where('emailAddress', '==', currentUser)
+                    .where('emailAddress', '==', emailAddress)
                     .get();
-                  const username = usernameQuery.docs[0].data().username;
-                  if (likes.includes(currentUser)) {
-                    firestore()
-                      .collection('Posts')
-                      .doc(id)
-                      .update({
-                        likes: firestore.FieldValue.arrayRemove(currentUser),
-                      });
+                  const userData = userQuery.docs[0].data();
+                  if (userData.likes.includes(id)) {
                     await firestore()
                       .collection('Users')
-                      .doc(username)
+                      .doc(userData.username)
                       .update({
                         likes: firestore.FieldValue.arrayRemove(id),
                       });
-                  } else {
-                    firestore()
+                    await firestore()
                       .collection('Posts')
                       .doc(id)
                       .update({
-                        likes: firestore.FieldValue.arrayUnion(currentUser),
+                        likes: firestore.FieldValue.arrayRemove(emailAddress),
                       });
+                    setLiked(false)
+                  } else {
                     await firestore()
                       .collection('Users')
-                      .doc(username)
+                      .doc(userData.username)
                       .update({
                         likes: firestore.FieldValue.arrayUnion(id),
                       });
+                    await firestore()
+                      .collection('Posts')
+                      .doc(id)
+                      .update({
+                        likes: firestore.FieldValue.arrayUnion(emailAddress),
+                      });
+                      setLiked(true)
                   }
                 }}>
                 <Icon
