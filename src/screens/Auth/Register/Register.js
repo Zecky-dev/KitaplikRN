@@ -62,6 +62,7 @@ const Register = ({navigation}) => {
             username,
             image: null,
             likes: [],
+            followers: [],
           });
           if(image) {
             const profileImageReference = storage().ref(`/users/${username}`)

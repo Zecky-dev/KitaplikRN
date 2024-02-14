@@ -21,11 +21,6 @@ const PostCard = ({postDetail, navigateToProfile, preview = false}) => {
   const {owner, comments, content, id, image, likes} = postDetail;
   const [postOwner, setPostOwner] = useState(null);
 
-  async function getPostOwnerData() {
-    const userQuery = await firestore().collection('Users').where('emailAddress',"==",owner).get()
-    setPostOwner(userQuery.docs[0].data())
-  }
-
   async function likeUnlikePost() {
 
     const currentUserQuery = await firestore().collection('Users').where('emailAddress',"==",currentUserEmail).get();
@@ -50,9 +45,30 @@ const PostCard = ({postDetail, navigateToProfile, preview = false}) => {
 
   }
 
+  async function followUnfollow() {
+    const followers = postOwner.followers;
+    if(followers.includes(currentUserEmail)) {
+      await firestore().collection('Users').doc(postOwner.username).update({
+        followers: firestore.FieldValue.arrayRemove(currentUserEmail)
+      })
+    }
+    else {
+      await firestore().collection('Users').doc(postOwner.username).update({
+        followers: firestore.FieldValue.arrayUnion(currentUserEmail)
+      })
+    }
+
+  }
+
   useEffect(() => {
-    getPostOwnerData()
-  }, [postDetail]);
+    const subscriber = firestore()
+      .collection('Users')
+      .where('emailAddress',"==",owner)
+      .onSnapshot((userQuery) => {
+        setPostOwner(userQuery.docs[0].data())
+      })
+    return () => subscriber();
+  },[])
 
   if(postOwner !== null) {
     return (
@@ -82,8 +98,8 @@ const PostCard = ({postDetail, navigateToProfile, preview = false}) => {
                 <Text>@{postOwner.username}</Text>
                 {!preview && (
                   <Button
-                    title="Takip Et"
-                    onPress={() => console.log('Takip Et')}
+                    title={postOwner.followers.includes(currentUserEmail) ? "Takipten Çık" : "Takip Et"}
+                    onPress={() => followUnfollow()}
                   />
                 )}
               </View>
