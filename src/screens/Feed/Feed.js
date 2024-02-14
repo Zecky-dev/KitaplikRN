@@ -1,9 +1,7 @@
 import React, {useState, useEffect} from 'react';
-import {View, FlatList, TouchableOpacity, Alert, Text} from 'react-native';
+import {View, FlatList, TouchableOpacity, Alert, Text, StyleSheet} from 'react-native';
 
 import PostCard from '../../components/PostCard/PostCard';
-import {posts} from '../../utils/mockdata';
-import colors from '../../utils/colors';
 
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import CreatePostModal from '../../components/CreatePostModal/CreatePostModal';
@@ -22,6 +20,12 @@ const Feed = ({navigation}) => {
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [posts, setPosts] = useState([]);
   const [postsLoading, setPostsLoading] = useState(false);
+
+  const styles = StyleSheet.create({
+    createPostButton: {
+      right: 8, backgroundColor: 'white', borderRadius: 4
+    }
+  })
 
   async function createPost(values) {
     const {image, content} = values;
@@ -64,17 +68,22 @@ const Feed = ({navigation}) => {
     })
   }
 
+  {/* Navigation Header Buttons */}
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
         <View style={{flexDirection: 'row'}}>
+          
+          {/* Create Post Header Button */}
           <TouchableOpacity
             onPress={() => {
               setCreatePostModalVisible(!createPostModalVisible);
             }}
-            style={{right: 8, backgroundColor: 'white', borderRadius: 4}}>
+            style={styles.createPostButton}>
             <Icon name="plus" color="black" size={32} />
           </TouchableOpacity>
+          
+                    {/* Create Post Header Button */}
           <TouchableOpacity
             onPress={() => {
               Alert.alert(

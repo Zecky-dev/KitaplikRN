@@ -15,30 +15,46 @@ import firestore from '@react-native-firebase/firestore';
 
 import auth from '@react-native-firebase/auth';
 
-const currentUser = auth().currentUser.email;
+const currentUserEmail = auth().currentUser.email;
 
 const PostCard = ({postDetail, navigateToProfile, preview = false}) => {
   const {owner, comments, content, id, image, likes} = postDetail;
-  const [commentModalVisible, setCommentModalVisible] = useState(false);
-  const [likeModalVisible, setLikeModalVisible] = useState(false);
-  const [liked, setLiked] = useState(false);
   const [postOwner, setPostOwner] = useState(null);
 
-  async function getPostOwner() {
-    if (owner !== undefined && owner !== null) {
-      const ownerQueryResult = await firestore()
-        .collection('Users')
-        .where('emailAddress', '==', owner)
-        .get();
-      setPostOwner(ownerQueryResult.docs[0].data());
+  async function getPostOwnerData() {
+    const userQuery = await firestore().collection('Users').where('emailAddress',"==",owner).get()
+    setPostOwner(userQuery.docs[0].data())
+  }
+
+  async function likeUnlikePost() {
+
+    const currentUserQuery = await firestore().collection('Users').where('emailAddress',"==",currentUserEmail).get();
+    const currentUserData = currentUserQuery.docs[0].data()
+    
+    if(likes.includes(currentUserEmail)) {
+      await firestore().collection('Posts').doc(id).update({
+        likes: firestore.FieldValue.arrayRemove(currentUserEmail)
+      })
+      await firestore().collection('Users').doc(currentUserData.username).update({
+        likes: firestore.FieldValue.arrayRemove(id)
+      })  
     }
+    else {
+      await firestore().collection('Posts').doc(id).update({
+        likes: firestore.FieldValue.arrayUnion(currentUserEmail)
+      })
+      await firestore().collection('Users').doc(currentUserData.username).update({
+        likes: firestore.FieldValue.arrayUnion(id)
+      })  
+    }
+
   }
 
   useEffect(() => {
-    getPostOwner();
+    getPostOwnerData()
   }, [postDetail]);
 
-  if (postOwner !== undefined && postOwner !== null && postDetail) {
+  if(postOwner !== null) {
     return (
       <View style={styles.container}>
         <View style={{flex: 1}}>
@@ -52,28 +68,18 @@ const PostCard = ({postDetail, navigateToProfile, preview = false}) => {
             }}>
             <Image
               source={{
-                uri: postOwner?.image,
+                uri: postOwner.image,
               }}
               style={{height: 50, width: 50, borderRadius: 25}}
             />
             <View style={{flex: 1}}>
               <Text
-                style={{
-                  textAlign: 'center',
-                  color: 'black',
-                  fontWeight: 'bold',
-                  fontSize: 16,
-                }}>
-                {postOwner?.nameSurname}
+                style={styles.postOwnerNameSurname}>
+                {postOwner.nameSurname}
               </Text>
               <View
-                style={{
-                  flexDirection: 'row',
-                  marginTop: 6,
-                  justifyContent: 'space-around',
-                  alignItems: 'center',
-                }}>
-                <Text>@{postOwner?.username}</Text>
+                style={styles.postOwnerProfileContainer}>
+                <Text>@{postOwner.username}</Text>
                 {!preview && (
                   <Button
                     title="Takip Et"
@@ -83,68 +89,28 @@ const PostCard = ({postDetail, navigateToProfile, preview = false}) => {
               </View>
             </View>
           </TouchableOpacity>
-          <Text style={{textAlign: 'justify', marginVertical: 4}}>
+          <Text style={styles.postContent}>
             {content}
           </Text>
 
           {!preview && (
             <View
-              style={{
-                flexDirection: 'row',
-                flex: 1,
-                justifyContent: 'space-around',
-                marginTop: 4,
-              }}>
+              style={styles.postActionButtonsContainer}>
+              
               <Pressable
-                style={{flexDirection: 'row', alignItems: 'center'}}
-                onPress={async () => {
-                  // Şuanki kullanıcının like'larını al
-                  const emailAddress = auth().currentUser.email;
-                  const userQuery = await firestore()
-                    .collection('Users')
-                    .where('emailAddress', '==', emailAddress)
-                    .get();
-                  const userData = userQuery.docs[0].data();
-                  if (userData.likes.includes(id)) {
-                    await firestore()
-                      .collection('Users')
-                      .doc(userData.username)
-                      .update({
-                        likes: firestore.FieldValue.arrayRemove(id),
-                      });
-                    await firestore()
-                      .collection('Posts')
-                      .doc(id)
-                      .update({
-                        likes: firestore.FieldValue.arrayRemove(emailAddress),
-                      });
-                    setLiked(false)
-                  } else {
-                    await firestore()
-                      .collection('Users')
-                      .doc(userData.username)
-                      .update({
-                        likes: firestore.FieldValue.arrayUnion(id),
-                      });
-                    await firestore()
-                      .collection('Posts')
-                      .doc(id)
-                      .update({
-                        likes: firestore.FieldValue.arrayUnion(emailAddress),
-                      });
-                      setLiked(true)
-                  }
-                }}>
+                style={styles.postActionButtonContainer}
+                onPress={() => likeUnlikePost()}>
                 <Icon
-                  name={likes.includes(currentUser) ? 'heart' : 'heart-outline'}
+                  name={likes.includes(currentUserEmail) ? 'heart' : 'heart-outline'}
                   size={24}
-                  color={likes.includes(currentUser) ? 'red' : null}
+                  color={likes.includes(currentUserEmail) ? 'red' : null}
                 />
-                <Text style={{marginLeft: 4, fontSize: 14}}>Beğen</Text>
+                <Text style={styles.postActionButtonLabel}>Beğen</Text>
               </Pressable>
-              <Pressable style={{flexDirection: 'row', alignItems: 'center'}}>
+              
+              <Pressable style={styles.postActionButtonContainer}>
                 <Icon name="comment-outline" size={24} />
-                <Text style={{marginLeft: 4, fontSize: 14}}>Yorum Yap</Text>
+                <Text style={styles.postActionButtonLabel}>Yorum Yap</Text>
               </Pressable>
             </View>
           )}
